@@ -1,0 +1,29 @@
+PGM
+
+  /* ----------------------------------------- */
+  /*  Simple AS/400 CL demo program            */
+  /* ----------------------------------------- */
+
+  DCL VAR(&TODAY)   TYPE(*CHAR) LEN(8)
+  DCL VAR(&MSG)     TYPE(*CHAR) LEN(50)
+  DCL VAR(&LIBNAME) TYPE(*CHAR) LEN(10) VALUE('TESTLIB')
+
+  /* Retrieve today's date */
+  RTVSYSVAL  SYSVAL(QDATE) RTNVAR(&TODAY)
+
+  /* Build a message */
+  CHGVAR VAR(&MSG) VALUE('Job ran on ' *CAT &TODAY)
+
+  /* Create a library (ignore error if it exists) */
+  MONMSG MSGID(CPF2111) EXEC(DO)
+    /* Already exists, carry on */
+  ENDDO
+  CRTLIB LIB(&LIBNAME) TEXT('Test library')
+
+  /* Send a completion message to the job log */
+  SNDPGMMSG  MSG(&MSG) TOPGMQ(*EXT) MSGTYPE(*COMP)
+
+  /* Send to a specific user's message queue */
+  SNDUSRMSG  MSG('Hello from the AS/400!') TOUSR(QSYSOPR)
+
+ENDPGM
